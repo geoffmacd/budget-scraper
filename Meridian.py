@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from re import sub
 
-money = '$6,150,593.22'
-
 class Meridian(Account):
 	"""Meridian scraper"""
 
