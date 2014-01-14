@@ -50,7 +50,7 @@ def analyze(accounts):
     print "Highest spending on %d %d with $ %.f2" % (highestS['date'].year, highestS['date'].month,  highestS['credit'])
     print "Lowest spending on %d %d with $ %.f2" % (lowestS['date'].year, lowestS['date'].month,  lowestS['credit'])
     print "Highest income on %d %d with $ %.2f" % (highestI['date'].year, highestI['date'].month,  highestI['debit'])
-    print "Average income: $ %.2f" % AvInc['debit']
+    print "Average income: $ %.2f" % AvInc
     print
 
     spending = 0
