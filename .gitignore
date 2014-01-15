@@ -1,1 +1,6 @@
 *.pyc,*.csv,*.html
+*.pyc
+
+*.csv
+
+*.html

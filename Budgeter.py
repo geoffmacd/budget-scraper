@@ -8,7 +8,7 @@ from datetime import datetime
 def month_year_iter( start_month, start_year, end_month, end_year ):
     ym_start= 12*start_year + start_month - 1
     ym_end= 12*end_year + end_month - 1
-    for ym in range( ym_start, ym_end ):
+    for ym in range( ym_start, ym_end+1 ):
         y, m = divmod( ym, 12 )
         yield y, m+1
 
@@ -18,50 +18,49 @@ def analyze(accounts):
     #add transactions from every account and sort
     t = []
     for a in accounts:
-        t.extend(a)
-    t.sort()
+        t.extend(a.d)
+    t.sort(key=lambda k: k['date'])
 
     #calc for each month, start at first trans
     sy = t[0]['date'].year
     sm = t[0]['date'].month
     ey = t[-1]['date'].year
     em = t[-1]['date'].month
-    m = []
+    mos = []
     i = 0
     for y,m in month_year_iter(sm,sy,em,ey):
         #cycle through transaction
         spending , income = 0,0
-        while t[i]['date'].month == m and t[i]['date'].year == y:
+        print
+        while i < len(t) and t[i]['date'].month == m and t[i]['date'].year == y:
             #process
-            if not specialCondition(l['name']):
+            if not specialCondition(t[i]['name']):
                 spending += t[i]['credit']
                 income += t[i]['debit']
-            i++
-        month = {'date':datetime.datetime(y,m,1),'spending':spending,'income':income}
+            i += 1
+        month = {'date':datetime(y,m,1),'spending':spending,'income':income}
         print "%d %d : Spent $ %.2f , Made $ %.2f" % (y,m,spending,income)
-        m.append(month)
+        mos.append(month)
+
 
     print
     #print highest spending, income months
-    highestS = max(m,key=lambda k: k['credit'])
-    lowestS = min(m,key=lambda k: k['credit'])
-    highestI = max(m,key=lambda k: k['debit'])
-    AvInc = sum(map(lambda x: x['debit'],m))/len(m)
-    print "Highest spending on %d %d with $ %.f2" % (highestS['date'].year, highestS['date'].month,  highestS['credit'])
-    print "Lowest spending on %d %d with $ %.f2" % (lowestS['date'].year, lowestS['date'].month,  lowestS['credit'])
-    print "Highest income on %d %d with $ %.2f" % (highestI['date'].year, highestI['date'].month,  highestI['debit'])
+    highestS = max(mos,key=lambda k: k['spending'])
+    lowestS = min(mos,key=lambda k: k['spending'])
+    highestI = max(mos,key=lambda k: k['income'])
+    AvInc = sum(map(lambda x: x['income'],mos))/len(mos)
+    print "Highest spending on %d %d with $ %.2f" % (highestS['date'].year, highestS['date'].month,  highestS['spending'])
+    print "Lowest spending on %d %d with $ %.2f" % (lowestS['date'].year, lowestS['date'].month,  lowestS['spending'])
+    print "Highest income on %d %d with $ %.2f" % (highestI['date'].year, highestI['date'].month,  highestI['income'])
     print "Average income: $ %.2f" % AvInc
     print
 
     spending = 0
     income = 0
-    for a in accounts:
-
-        for l in a.d:
-            print l
-            if not specialCondition(l['name']):
-                spending += l['credit']
-                income += l['debit']
+    for l in t:
+        if not specialCondition(l['name']):
+            spending += l['credit']
+            income += l['debit']
 
     print 'Total Spending: ' + str(spending)
     print 'Total Income: ' + str(income)
@@ -70,8 +69,10 @@ def analyze(accounts):
 
 def specialCondition(n):
     # do not include itrade transfers, CIBC is included
-    if n.find("ITrade") > -1:
-        return True
+    codeWords = ["ITrade","In from advntge","Cheque 50","INSTANT TELLER DEPOSIT","PAYMENT THANK YOU","INTERNET TRANSFER"]
+    for c in codeWords:
+        if n.find(c) > -1:
+            return True
 
 def main(argv):
     try:
